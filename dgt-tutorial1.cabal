@@ -1,0 +1,50 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           dgt-tutorial1
+version:        0.1.0.0
+category:       Web
+homepage:       https://github.com/githubuser/dgt-tutorial1#readme
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2024 Author name here
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Examples
+      Grammar
+      Grammar.Core
+      Grammar.Eval
+      Grammar.Utils
+  other-modules:
+      Paths_dgt_tutorial1
+  autogen-modules:
+      Paths_dgt_tutorial1
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable dgt-tutorial1
+  main-is: Main.hs
+  other-modules:
+      Paths_dgt_tutorial1
+  autogen-modules:
+      Paths_dgt_tutorial1
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
