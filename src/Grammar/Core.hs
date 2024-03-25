@@ -33,7 +33,7 @@ data Op
   = AddInt
   | SubInt
   | MultInt
-  | DivInt
+  | DivInt -- nao implementado em eval
   | ModInt
   | LTEInt
   | EqInt
