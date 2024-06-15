@@ -1,6 +1,9 @@
+{-# LANGUAGE GADTs #-}
+
 module Grammar.Utils (module Grammar.Utils) where
 
 import Grammar.Core
+import Grammar.Core2 (Lit' (BoolL', CharL', FloatL', IntL', ListL', PairL'))
 
 tipoLit :: Lit -> Tipo
 tipoLit (IntL _) = IntT
@@ -45,3 +48,11 @@ tipoOp Filter = [LambdaT $ [PolyT 0] --> BoolT, ListT $ PolyT 0] --> PolyT 0
 
 ariOp :: Op -> Int
 ariOp = length . _argT . tipoOp
+
+unpackLit :: Lit' a -> a
+unpackLit (IntL' x) = x
+unpackLit (FloatL' x) = x
+unpackLit (CharL' x) = x
+unpackLit (BoolL' x) = x
+unpackLit (PairL' x y) = (unpackLit x, unpackLit y)
+unpackLit (ListL' x) = unpackLit <$> x

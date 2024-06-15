@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -23,8 +23,12 @@ library
       Examples
       Grammar
       Grammar.Core
+      Grammar.Core2
       Grammar.Eval
+      Grammar.Eval2
       Grammar.Utils
+      HList
+      MyNat
   other-modules:
       Paths_dgt_tutorial1
   autogen-modules:

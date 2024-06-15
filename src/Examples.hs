@@ -1,6 +1,15 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeApplications #-}
+
 module Examples (module Examples) where
 
+import Data.Void
+import GHC.TypeNats (KnownNat (natSing), SNat)
 import Grammar
+import HList
 
 -- | Uma expressao
 expr1 :: AST
@@ -21,6 +30,28 @@ expr1 =
          ToUpper
            -< [Leaf $ Literal (CharL 'c')]
        ]
+
+x :: AST' Int '[Int, Char, Int]
+x = A $ natSing @2
+
+e1 :: AST' Int '[Int, Char, Char]
+e1 = AddInt' (C $ IntL' 1) (C $ IntL' 1)
+
+-- e2 :: AST' Bool '[Int, Char, Char]
+-- e2 = GTEInt' e1 (C $ IntL' 3)
+
+-- e3 :: AST' Int '[Lit' Int, Lit' Char]
+-- e3 =
+--   If'
+--     (IsDigit' $ A 0)
+--     ( SubInt'
+--         ( AddInt'
+--             (C $ IntL' 2)
+--             (MultInt' (C $ IntL' 5) (C $ IntL' 3))
+--         )
+--         (C $ IntL' 7)
+--     )
+--     (C $ IntL' (-1))
 
 -- | Outra expressao
 expr2 :: AST
@@ -96,6 +127,9 @@ ageIn =
     -< [ Leaf $ Arg 0,
          Leaf $ Arg 1
        ]
+
+-- ageIn' :: AST' Int
+-- ageIn' = Node' (AddInt' (Leaf' $ Arg' 0) (Leaf' $ Arg' 1))
 
 -- | Calcula a distancia euclidiana de dois pontos no plano
 -- |
