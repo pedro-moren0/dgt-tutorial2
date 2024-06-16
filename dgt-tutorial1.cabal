@@ -20,15 +20,14 @@ extra-source-files:
 
 library
   exposed-modules:
+      Args
+      Args.FamilyUtils
+      Args.HList
+      Args.Pickable
       Examples
       Grammar
       Grammar.Core
-      Grammar.Core2
       Grammar.Eval
-      Grammar.Eval2
-      Grammar.Utils
-      HList
-      MyNat
   other-modules:
       Paths_dgt_tutorial1
   autogen-modules:

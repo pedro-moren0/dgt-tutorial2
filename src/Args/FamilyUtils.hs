@@ -1,16 +1,14 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module MyNat where
+module Args.FamilyUtils (module Args.FamilyUtils) where
 
 import Data.Kind (Constraint, Type)
-import Data.Void
-import GHC.TypeNats
+import Data.Void (Void)
+import GHC.TypeNats (Nat, type (+), type (-))
 
 type Len :: [Type] -> Nat
 type family Len a where
@@ -27,18 +25,8 @@ type (<) :: Nat -> Nat -> Constraint
 type family n < m where
   n < m = n <? m ~ 'True
 
--- Isso aqui eh um pouco incomodo
 type (!) :: [Type] -> Nat -> Type
 type family xs ! n where
   '[] ! _ = Void
   (x ': _) ! 0 = x
   (_ ': xs) ! n = xs ! (n - 1)
-
-type NonEmpty :: [Type] -> Constraint
-type family NonEmpty xs where
-  NonEmpty xs = 0 < Len xs
-
-type IsHead :: Nat -> Bool
-type family IsHead n where
-  IsHead 0 = True
-  IsHead _ = False
