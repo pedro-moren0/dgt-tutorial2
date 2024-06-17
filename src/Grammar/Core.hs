@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -17,6 +18,8 @@ data Lit a where
   BoolL :: Bool -> Lit Bool
   PairL :: Lit b -> Lit c -> Lit (b, c)
   ListL :: [Lit a] -> Lit [a]
+
+deriving instance Show (Lit a)
 
 type Op :: [Type] -> Type -> Type
 data Op xs a where
@@ -52,6 +55,8 @@ data Op xs a where
   Tail :: Op xs [a] -> Op xs [a]
   Map :: Op '[a] b -> Op xs [a] -> Op xs [b]
   Filter :: Op '[a] Bool -> Op xs [a] -> Op xs [a]
+
+deriving instance Show (Op xs a)
 
 type AST :: [Type] -> Type -> Type
 type AST xs a = Op xs a

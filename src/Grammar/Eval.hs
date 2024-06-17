@@ -4,6 +4,7 @@ module Grammar.Eval (module Grammar.Eval) where
 
 import Args.HList
 import Args.Pickable ((!.))
+import Control.Monad (filterM)
 import Data.Char (isDigit, isLetter, toLower, toUpper)
 import Grammar.Core
 
@@ -15,38 +16,115 @@ eval (C (IntL x)) _ = Right x
 eval (C (FloatL x)) _ = Right x
 eval (C (CharL x)) _ = Right x
 eval (C (BoolL x)) _ = Right x
-eval (C (PairL x y)) ls = case (eval (C x) ls, eval (C y) ls) of
-  (Left p, _) -> Left p
-  (_, Left q) -> Left q
-  (Right p, Right q) -> Right (p, q)
-eval (C (ListL xs)) ls = (`eval` ls) . C <$> xs
-eval (AddInt x1 x2) ls = eval x1 ls + eval x2 ls
-eval (SubInt x1 x2) ls = eval x1 ls - eval x2 ls
-eval (MultInt x1 x2) ls = eval x1 ls * eval x2 ls
-eval (DivInt x1 x2) ls = eval x1 ls `div` eval x2 ls -- falha
-eval (ModInt x1 x2) ls = eval x1 ls `mod` eval x2 ls -- falha
-eval (GTEInt x1 x2) ls = eval x1 ls >= eval x2 ls
-eval (LTEInt x1 x2) ls = eval x1 ls <= eval x2 ls
-eval (Equals x1 x2) ls = eval x1 ls == eval x2 ls
-eval (AddFloat x1 x2) ls = eval x1 ls + eval x2 ls
-eval (SubFloat x1 x2) ls = eval x1 ls - eval x2 ls
-eval (MultFloat x1 x2) ls = eval x1 ls * eval x2 ls
-eval (DivFloat x1 x2) ls = eval x1 ls / eval x2 ls
-eval (Sqrt x1) ls = sqrt $ eval x1 ls -- falha
-eval (IsLetter x1) ls = isLetter $ eval x1 ls
-eval (IsDigit x1) ls = isDigit $ eval x1 ls
-eval (ToUpper x1) ls = toUpper $ eval x1 ls
-eval (ToLower x1) ls = toLower $ eval x1 ls
-eval (And x1 x2) ls = eval x1 ls && eval x2 ls
-eval (Or x1 x2) ls = eval x1 ls || eval x2 ls
-eval (Not x1) ls = not $ eval x1 ls
-eval (If p x1 x2) ls = if eval p ls then eval x1 ls else eval x2 ls
-eval (ToPair x1 x2) ls = (eval x1 ls, eval x2 ls)
-eval (Fst x1) ls = fst $ eval x1 ls
-eval (Snd x1) ls = snd $ eval x1 ls
-eval (Len xs) ls = length $ eval xs ls
-eval (Cons x xs) ls = eval x ls : eval xs ls
-eval (Head xs) ls = head $ eval xs ls -- falha
-eval (Tail xs) ls = tail $ eval xs ls
-eval (Map f xs) ls = eval f . (:. Nil) <$> eval xs ls
-eval (Filter p xs) ls = filter (eval p . (:. Nil)) (eval xs ls)
+eval (C (PairL x y)) ls = do
+  first <- eval (C x) ls
+  second <- eval (C y) ls
+  return (first, second)
+eval (C (ListL xs)) ls = traverse ((`eval` ls) . C) xs
+eval (AddInt x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n + m
+eval (SubInt x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n - m
+eval (MultInt x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n * m
+eval (DivInt x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  if m == 0 then Left "Division by zero" else return $ n `div` m
+eval (ModInt x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  if m == 0 then Left "Division by zero" else return $ n `mod` m
+eval (GTEInt x1 x2) ls = do
+  p <- eval x1 ls
+  q <- eval x2 ls
+  return $ p >= q
+eval (LTEInt x1 x2) ls = do
+  p <- eval x1 ls
+  q <- eval x2 ls
+  return $ p <= q
+eval (Equals x1 x2) ls = do
+  p <- eval x1 ls
+  q <- eval x2 ls
+  return $ p == q
+eval (AddFloat x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n + m
+eval (SubFloat x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n - m
+eval (MultFloat x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n * m
+eval (DivFloat x1 x2) ls = do
+  n <- eval x1 ls
+  m <- eval x2 ls
+  return $ n / m
+eval (Sqrt x1) ls = do
+  n <- eval x1 ls
+  if n < 0 then Left "Negative square root" else return $ sqrt n
+eval (IsLetter x1) ls = do
+  c <- eval x1 ls
+  return $ isLetter c
+eval (IsDigit x1) ls = do
+  c <- eval x1 ls
+  return $ isDigit c
+eval (ToUpper x1) ls = do
+  c <- eval x1 ls
+  return $ toUpper c
+eval (ToLower x1) ls = do
+  c <- eval x1 ls
+  return $ toLower c
+eval (And x1 x2) ls = do
+  p <- eval x1 ls
+  q <- eval x2 ls
+  return $ p && q
+eval (Or x1 x2) ls = do
+  p <- eval x1 ls
+  q <- eval x2 ls
+  return $ p || q
+eval (Not x1) ls = do
+  p <- eval x1 ls
+  return $ not p
+eval (If p x1 x2) ls = do
+  cond <- eval p ls
+  if cond then eval x1 ls else eval x2 ls
+eval (ToPair x1 x2) ls = do
+  a <- eval x1 ls
+  b <- eval x2 ls
+  return (a, b)
+eval (Fst x1) ls = do
+  pair <- eval x1 ls
+  return $ fst pair
+eval (Snd x1) ls = do
+  pair <- eval x1 ls
+  return $ snd pair
+eval (Len xs) ls = do
+  ys <- eval xs ls
+  return $ length ys
+eval (Cons x xs) ls = do
+  y <- eval x ls
+  ys <- eval xs ls
+  return $ y : ys
+eval (Head xs) ls = do
+  ys <- eval xs ls
+  return $ head ys
+eval (Tail xs) ls = do
+  ys <- eval xs ls
+  return $ tail ys
+eval (Map f xs) ls = do
+  ys <- eval xs ls
+  traverse (eval f . (:. Nil)) ys
+eval (Filter p xs) ls = do
+  ys <- eval xs ls
+  let cond = eval p . (:. Nil)
+  filterM cond ys
