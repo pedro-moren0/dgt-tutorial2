@@ -7,13 +7,18 @@ import Args.Pickable ((!.))
 import Data.Char (isDigit, isLetter, toLower, toUpper)
 import Grammar.Core
 
-eval :: AST xs a -> Args xs -> a
-eval (A n) ls = ls !. n
-eval (C (IntL x)) _ = x
-eval (C (FloatL x)) _ = x
-eval (C (CharL x)) _ = x
-eval (C (BoolL x)) _ = x
-eval (C (PairL x y)) ls = (eval (C x) ls, eval (C y) ls)
+type ST a = Either String a
+
+eval :: AST xs a -> Args xs -> ST a
+eval (A n) ls = Right $ ls !. n
+eval (C (IntL x)) _ = Right x
+eval (C (FloatL x)) _ = Right x
+eval (C (CharL x)) _ = Right x
+eval (C (BoolL x)) _ = Right x
+eval (C (PairL x y)) ls = case (eval (C x) ls, eval (C y) ls) of
+  (Left p, _) -> Left p
+  (_, Left q) -> Left q
+  (Right p, Right q) -> Right (p, q)
 eval (C (ListL xs)) ls = (`eval` ls) . C <$> xs
 eval (AddInt x1 x2) ls = eval x1 ls + eval x2 ls
 eval (SubInt x1 x2) ls = eval x1 ls - eval x2 ls
